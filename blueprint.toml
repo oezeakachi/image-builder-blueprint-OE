@@ -1,17 +1,54 @@
-name = "BLUEPRINT-NAME"
-description = "LONG FORM DESCRIPTION OF BLUEPRINT"
-version = "0.0.1"
-modules = []
-groups = []
+name = "fedora"
+description = "Fedora Image"
+distro = "fedora-37"
+
+[customizations.kernel]
+append = "net.ifnames.prefix=net quiet systemd.show_status=yes"
+
+# Filesystem
+#
+[[customizations.filesystem]]
+mountpoint = "/boot"
+size = "1 GiB"
+#[[customizations.filesystem]]
+#mountpoint = "swap"
+#size = "2 GiB"
+[[customizations.filesystem]]
+mountpoint = "/"
+size = "8 GiB"
+[[customizations.filesystem]]
+mountpoint = "/home"
+size = "2 GiB"
+[[customizations.filesystem]]
+mountpoint = "/tmp"
+size = "2 GiB"
+[[customizations.filesystem]]
+mountpoint = "/var"
+size = "8 GiB"
+[[customizations.filesystem]]
+mountpoint = "/var/log"
+size = "2 GiB"
+[[customizations.filesystem]]
+mountpoint = "/var/log/audit"
+size = "2 GiB"
+[[customizations.filesystem]]
+mountpoint = "/var/tmp"
+size = "2 GiB"
 
 # Install packages. Each individual package needs a block
 [[packages]]
-name = "PACKAGE1"
+name = "nginx"
 version = "*"
 
 [[packages]]
-name = "PACKAGE2"
+name = "ansible"
 version = "*"
+
+[[packages]]
+name = "postgresql"
+version = "*"
+
+
 
 [customizations]
 hostname = "HOSTNAME"
@@ -19,17 +56,17 @@ hostname = "HOSTNAME"
 # Set ssh key for existing users
 [[customizations.sshkey]]
 user = "root"
-key = "PUBLIC-SSH-KEY"
+key = ""
 
 # Set timezone
 [customizations.timezone]
-timezone = "TIMEZONE"
-ntpservers = "NTP_SERVER"
+timezone = "Europe/London"
+ntpservers = ["pool 2.fedora.pool.ntp.org iburst"]
 
 # Set locale
 [customizations.locale]
-languages = ["LANGUAGE"]
-keyboard = "KEYBOARD"
+languages = ["en_UK.UTF-8"]
+keyboard = "uk"
 
 # Create a new user
 # Replace PASSWORD-HASH with the actual password hash. To generate the hash, use a command such as:
@@ -38,33 +75,44 @@ keyboard = "KEYBOARD"
 # Only the user name is required - you can leave out anything else
 # Repeat this block for every user to be created
 [[customizations.user]]
-name = "USER-NAME"
+name = "obi"
 description = "USER-DESCRIPTION"
-password = "PASSWORD-HASH"
-key = "PUBLIC-SSH-KEY"
-home = "/home/USER-NAME/"
+password = ""
+key = ""
+home = "/home/obi/"
 shell = "/usr/bin/bash"
 groups = ["users", "wheel"]
-uid = NUMBER
-gid = NUMBER
+uid = 1000
+gid = 1000
+
+# Give user sudo access
+[[customizations.sudo]]
+name = "obi"
+nopasswd = false
+commands = ["ALL"]
 
 # Create a new group. The name is required but GID is optional
 # Repeat this block for every group to be created
 [[customizations.group]]
 name = "GROUP-NAME"
-gid = "NUMBER"
+gid = 1000
 
 # Configure firewall ports
 [customizations.firewall]
-port = ["PORTS"]
+port = ["80/tcp", "443/tcp", "22/tcp"]
+
 
 # Configure firewall services
 [customizations.firewall.services]
-enabled = ["SERVICES"]
-disabled = ["SERVICES"]
+enabled = ["http", "https"]
+#disabled = ["http", "https"]
 
 # Configure services
 [customizations.services]
-enabled = ["SERVICES"]
-disabled = ["SERVICES"]
+enabled = ["nginx"]
+#disabled = ["nginx", "postgresql"]
 
+
+[customizations.openscap]
+profile_id = "xccdf_org.ssgproject.content_profile_standard"
+datastream = "/usr/share/xml/scap/ssg/content/ssg-fedora-37-ds.xml"
