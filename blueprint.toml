@@ -48,7 +48,9 @@ version = "*"
 name = "postgresql"
 version = "*"
 
-
+[[packages]]
+name = "firewalld"
+version = "*"
 
 [customizations]
 hostname = "HOSTNAME"
